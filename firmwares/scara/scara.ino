@@ -3,9 +3,7 @@
 #include <SoftwareSerial.h>
 #include <Wire.h>
 
-//36.6 // 35
-// white -374 0
-// yellow -374-183= 191
+
 /*
   Version   1.0.1
   HISTORY
@@ -54,14 +52,15 @@ Servo servoPen;
 int colorPoint[18][2] = {
   {-307, -159}, {-260, -157}, {-226,-155}, {-192, -155}, {-154, -153}, {-118, -151},
   {-300, -188}, {-260, -187}, {-226, -187}, {-192, -184}, {-154, -187}, {-116, -184},
-  {-307, -218}, {-260, -224}, {-226, -223}, {-190, -218}, {-154, -220}, {-118, -218}
+  {-307, -224}, {-260, -224}, {-226, -223}, {-190, -218}, {-154, -220}, {-118, -218}
 };
 
-int waterPoint[2] = {-53, -206};
-int spongePoint[2] = {-134, -200};
+int waterPoint[2] = {-63, -206};
+int spongePoint[2] = {-63, -276};
 
 #define ARML1 168
-#define ARML2 206
+// #define ARML2 206
+#define ARML2 240
 /************** motor movements ******************/
 void stepperMoveA(int dir)
 {
@@ -325,6 +324,9 @@ void parseGcode(char * cmd)
     case 1 : // xyz move
       parseCordinate(cmd);
       break;
+    case 27 :
+      brushClean();
+      break;
     case 28 : // home
       stepAuxDelay = 0;
       tarX =-(roboSetup.data.arm0len + roboSetup.data.arm1len - 0.01); tarY = 0;
@@ -335,20 +337,7 @@ void parseGcode(char * cmd)
   }
 }
 
-void parseCcode(char * cmd)
-{
-  char * tmp;
-  char * str;
-  str = strtok_r(cmd, " ", &tmp);
-  int colorpos = atoi(tmp);
-
-  Serial.println("Move to start point start");
-  tarX =-(roboSetup.data.arm0len + roboSetup.data.arm1len - 0.01); 
-  tarY = 0;
-  prepareMove();
-  Serial.println("Move to start point complete");
-  servoPen.write(roboSetup.data.penUpPos + 10);
-  
+void brushClean() {
   for (int i = 0; i < 3; i++) {
     Serial.println("Cleaning Brush start");
     tarX = waterPoint[0];
@@ -356,7 +345,7 @@ void parseCcode(char * cmd)
     prepareMove();
     servoPen.write(roboSetup.data.penDownPos);
     delay(100);
-    for (int i = 0; i < 3; i++){
+    for (int i = 0; i < 5; i++){
       servoPen.write(roboSetup.data.penUpPos);
       delay(100);
       servoPen.write(roboSetup.data.penDownPos);
@@ -387,6 +376,23 @@ void parseCcode(char * cmd)
     Serial.println("Removing water complete");
     servoPen.write(roboSetup.data.penUpPos + 10);
   }
+}
+
+void parseCcode(char * cmd)
+{
+  char * tmp;
+  char * str;
+  str = strtok_r(cmd, " ", &tmp);
+  int colorpos = atoi(tmp);
+
+  Serial.println("Move to start point start");
+  tarX =-(roboSetup.data.arm0len + roboSetup.data.arm1len - 0.01); 
+  tarY = 0;
+  prepareMove();
+  Serial.println("Move to start point complete");
+  servoPen.write(roboSetup.data.penUpPos + 10);
+  
+  brushClean();
 
   Serial.print("Coloring Brush start : "); Serial.println((int)colorpos);
   tarX = colorPoint[colorpos][0];
@@ -419,6 +425,7 @@ void echoArmSetup(char * cmd)
   Serial.print(" D"); Serial.println((int)roboSetup.data.penDownPos);
 }
 
+
 void parseRobotSetup(char * cmd)
 {
   char * tmp;
@@ -446,6 +453,7 @@ void parseRobotSetup(char * cmd)
   syncRobotSetup();
 }
 
+
 void parsePenPosSetup(char * cmd)
 {
   char * tmp;
@@ -468,6 +476,7 @@ void parsePenPosSetup(char * cmd)
 
   syncRobotSetup();
 }
+
 
 void parseMcode(char * cmd)
 {
@@ -509,6 +518,7 @@ void parseCmd(char * cmd)
   }
   Serial.println("OK");
 }
+
 
 // local data
 void initRobotSetup()
@@ -595,7 +605,7 @@ boolean process_serial(void)
       buf[bufindex] = '\0';
       parseCmd(buf);
       result = true;
-      memset(buf,0,64);
+      memset(buf, 0, 64);
       bufindex = 0;
     }
     if (bufindex >= 64) {

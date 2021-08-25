@@ -102,7 +102,8 @@ class Scara(QGraphicsItem):
         self.ui = ui
         self.color = QColor(QtCore.Qt.lightGray)
         self.L1 = 168.0
-        self.L2 = 206.0
+        # self.L2 = 206.0
+        self.L2 = 240.0
         self.speed = 50
         self.scaler = 1.0
         self.motoADir = 0
@@ -224,10 +225,10 @@ class Scara(QGraphicsItem):
         moveCnt = 0
         self.M4(0) # turn laser power down when perform transition
         self.q.get()
-        self.colorList = [4, 5, 8, 7, 6, 2, 9, 15, 14, 13]
+        self.colorList = [2, 3, 4, 5, 8, 7, 6, 2, 9, 15, 14, 13, 16, 12, 10, 11, 0, 1]
 
         for move in self.moveList :
-            self.C1(self.colorList[moveCnt])
+            self.C1(self.colorList[moveCnt % 17])
             while self.robotState == BUSYING :
                 self.q.get()
             # loop for all points
@@ -279,6 +280,7 @@ class Scara(QGraphicsItem):
 
             moveCnt += 1
             self.robotSig.emit("pg %d" % (int(moveCnt * 100 / moveLen)))
+        self.G27()
         self.G28()
         self.printing = False
         self.robotSig.emit("done")
@@ -385,6 +387,11 @@ class Scara(QGraphicsItem):
         self.robotGoBusy()
         self.sendCmd(cmd)
     
+    def G27(self) :
+        if self.robotState != IDLE : return
+        cmd = "G27\n"
+        self.sendCmd(cmd)
+
     def G28(self) :
         if self.robotState != IDLE : return
         cmd = "G28\n"
