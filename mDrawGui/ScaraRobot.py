@@ -101,9 +101,8 @@ class Scara(QGraphicsItem):
         self.scene = scene
         self.ui = ui
         self.color = QColor(QtCore.Qt.lightGray)
-        self.L1 = 168.0
-        # self.L2 = 206.0
-        self.L2 = 240.0
+        self.L1 = 315.0
+        self.L2 = 210.0
         self.speed = 50
         self.scaler = 1.0
         self.motoADir = 0

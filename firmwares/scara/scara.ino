@@ -58,9 +58,8 @@ int colorPoint[18][2] = {
 int waterPoint[2] = {-63, -206};
 int spongePoint[2] = {-63, -276};
 
-#define ARML1 168
-// #define ARML2 206
-#define ARML2 240
+#define ARML1 315
+#define ARML2 210
 /************** motor movements ******************/
 void stepperMoveA(int dir)
 {
@@ -539,7 +538,7 @@ void initRobotSetup()
     roboSetup.data.motoBDir = 0;
     roboSetup.data.arm0len = ARML1;
     roboSetup.data.arm1len = ARML2;
-    roboSetup.data.speed = 85;
+    roboSetup.data.speed = 75;
     roboSetup.data.penUpPos = 130;
     roboSetup.data.penDownPos = 90;
     roboSetup.data.penColorPos = 90;
