@@ -12,7 +12,7 @@ class Ui_Form(object):
     def setupUi(self, Form):
         Form.setObjectName("Form")
         # Form.resize(959, 720)
-        Form.resize(1500, 1000)
+        Form.resize(1410, 1100)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -20,8 +20,8 @@ class Ui_Form(object):
         Form.setSizePolicy(sizePolicy)
         # Form.setMinimumSize(QtCore.QSize(959, 720))
         # Form.setMaximumSize(QtCore.QSize(959, 768))
-        Form.setMinimumSize(QtCore.QSize(1000, 1000))
-        Form.setMaximumSize(QtCore.QSize(1500, 1000))
+        Form.setMinimumSize(QtCore.QSize(1410, 1100))
+        Form.setMaximumSize(QtCore.QSize(1410, 1100))
         font = QtGui.QFont()
         font.setFamily("Arial")
         font.setBold(True)
@@ -111,7 +111,7 @@ class Ui_Form(object):
         self.progressBar.setProperty("value", 0)
         self.progressBar.setObjectName("progressBar")
         self.robotCombo = QtWidgets.QComboBox(Form)
-        self.robotCombo.setGeometry(QtCore.QRect(1230, 10, 121, 31))
+        self.robotCombo.setGeometry(QtCore.QRect(1220, 10, 121, 31))
         font = QtGui.QFont()
         font.setFamily("Arial")
         font.setBold(True)
@@ -146,7 +146,7 @@ class Ui_Form(object):
         self.robotCombo.addItem("")
         self.robotCombo.addItem("")
         self.groupBox = QtWidgets.QGroupBox(Form)
-        self.groupBox.setGeometry(QtCore.QRect(1230, 240, 181, 171))
+        self.groupBox.setGeometry(QtCore.QRect(1220, 240, 181, 171))
         self.groupBox.setStyleSheet("QGroupBox {\n"
 "    background-color: rgb(49, 49, 49);\n"
 "    border: 1px solid rgb(108, 108, 108);\n"
@@ -395,7 +395,7 @@ class Ui_Form(object):
         self.btnPenUp_2.setObjectName("btnPenUp_2")
         self.tabWidget.addTab(self.tabUtil, "")
         self.btnSetRobot = QtWidgets.QPushButton(Form)
-        self.btnSetRobot.setGeometry(QtCore.QRect(892, 10, 61, 31))
+        self.btnSetRobot.setGeometry(QtCore.QRect(1342, 10, 61, 31))
         self.btnSetRobot.setStyleSheet(" QPushButton {\n"
 "     color: rgb(178,178,178);\n"
 "     border: 1px solid rgb(67,67,67);\n"
@@ -437,7 +437,7 @@ class Ui_Form(object):
         self.btnHome.setText("")
         self.btnHome.setObjectName("btnHome")
         self.groupBox_4 = QtWidgets.QGroupBox(Form)
-        self.groupBox_4.setGeometry(QtCore.QRect(1230, 420, 181, 291))
+        self.groupBox_4.setGeometry(QtCore.QRect(1220, 420, 181, 291))
         self.groupBox_4.setStyleSheet("QGroupBox {\n"
 "    background-color: rgb(77, 77, 77);\n"
 "    border: 1px solid rgb(107, 107, 107);\n"
@@ -579,7 +579,7 @@ class Ui_Form(object):
 "")
         self.btnSend.setObjectName("btnSend")
         self.labelXpos = QtWidgets.QLineEdit(Form)
-        self.labelXpos.setGeometry(QtCore.QRect(690, 110, 61, 20))
+        self.labelXpos.setGeometry(QtCore.QRect(1100, 60, 61, 20))
         font = QtGui.QFont()
         font.setFamily("Arial")
         font.setBold(True)
@@ -597,7 +597,7 @@ class Ui_Form(object):
         self.labelXpos.setAlignment(QtCore.Qt.AlignCenter)
         self.labelXpos.setObjectName("labelXpos")
         self.labelYpos = QtWidgets.QLineEdit(Form)
-        self.labelYpos.setGeometry(QtCore.QRect(690, 140, 61, 20))
+        self.labelYpos.setGeometry(QtCore.QRect(1100, 90, 61, 20))
         font = QtGui.QFont()
         font.setFamily("Arial")
         font.setBold(True)
@@ -615,7 +615,7 @@ class Ui_Form(object):
         self.labelYpos.setAlignment(QtCore.Qt.AlignCenter)
         self.labelYpos.setObjectName("labelYpos")
         self.label = QtWidgets.QLabel(Form)
-        self.label.setGeometry(QtCore.QRect(650, 110, 41, 20))
+        self.label.setGeometry(QtCore.QRect(1050, 60, 50, 20))
         font = QtGui.QFont()
         font.setFamily("Arial")
         font.setBold(True)
@@ -625,7 +625,7 @@ class Ui_Form(object):
 "background-color: rgb(249, 249, 249);")
         self.label.setObjectName("label")
         self.label_2 = QtWidgets.QLabel(Form)
-        self.label_2.setGeometry(QtCore.QRect(650, 140, 41, 20))
+        self.label_2.setGeometry(QtCore.QRect(1050, 90, 50, 20))
         font = QtGui.QFont()
         font.setFamily("Arial")
         font.setBold(True)
@@ -635,7 +635,7 @@ class Ui_Form(object):
 "background-color: rgb(249, 249, 249);")
         self.label_2.setObjectName("label_2")
         self.groupBox_2 = QtWidgets.QGroupBox(Form)
-        self.groupBox_2.setGeometry(QtCore.QRect(1230, 50, 181, 181))
+        self.groupBox_2.setGeometry(QtCore.QRect(1220, 50, 181, 181))
         self.groupBox_2.setStyleSheet("QGroupBox {\n"
 "    background-color: rgb(49, 49, 49);\n"
 "    border: 1px solid rgb(108, 108, 108);\n"
@@ -721,7 +721,7 @@ class Ui_Form(object):
 "")
         self.btnWiring.setObjectName("btnWiring")
         self.label_3 = QtWidgets.QLabel(Form)
-        self.label_3.setGeometry(QtCore.QRect(1000, 80, 101, 16))
+        self.label_3.setGeometry(QtCore.QRect(1050, 25, 130, 16))
         font = QtGui.QFont()
         font.setFamily("Arial")
         font.setBold(True)
@@ -731,7 +731,7 @@ class Ui_Form(object):
 "background-color: rgb(249, 249, 249);")
         self.label_3.setObjectName("label_3")
         self.labelScale = QtWidgets.QLineEdit(Form)
-        self.labelScale.setGeometry(QtCore.QRect(1040, 170, 61, 20))
+        self.labelScale.setGeometry(QtCore.QRect(1100, 120, 61, 20))
         font = QtGui.QFont()
         font.setFamily("Arial")
         font.setBold(True)
@@ -749,7 +749,7 @@ class Ui_Form(object):
         self.labelScale.setAlignment(QtCore.Qt.AlignCenter)
         self.labelScale.setObjectName("labelScale")
         self.label_4 = QtWidgets.QLabel(Form)
-        self.label_4.setGeometry(QtCore.QRect(1000, 170, 41, 20))
+        self.label_4.setGeometry(QtCore.QRect(1050, 120, 50, 20))
         font = QtGui.QFont()
         font.setFamily("Arial")
         font.setBold(True)
@@ -838,7 +838,7 @@ class Ui_Form(object):
 "background-color: rgb(249, 249, 249);")
         self.labelEstTime.setObjectName("labelEstTime")
         self.labelMachineState = QtWidgets.QLabel(Form)
-        self.labelMachineState.setGeometry(QtCore.QRect(720, 200, 41, 20))
+        self.labelMachineState.setGeometry(QtCore.QRect(1050, 150, 41, 20))
         font = QtGui.QFont()
         font.setFamily("Arial")
         font.setBold(True)

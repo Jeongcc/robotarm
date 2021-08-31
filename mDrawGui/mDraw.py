@@ -449,7 +449,7 @@ class MainUI(QWidget):
         self.pic = None
         scene.clear()
         rc = scene.sceneRect()
-        cent = QPointF(rc.width()/2,rc.height()/2+100)
+        cent = QPointF(rc.width()/2,rc.height()/2-22)
         self.robotCent = cent
         self.robot.robotCent =(cent.x(),cent.y())
 
