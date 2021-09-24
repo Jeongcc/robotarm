@@ -101,8 +101,9 @@ class Scara(QGraphicsItem):
         self.scene = scene
         self.ui = ui
         self.color = QColor(QtCore.Qt.lightGray)
-        self.L1 = 315.0
-        self.L2 = 210.0
+        # Arm Length
+        self.L1 = 168.0
+        self.L2 = 212.0
         self.speed = 50
         self.scaler = 1.0
         self.motoADir = 0
@@ -227,6 +228,7 @@ class Scara(QGraphicsItem):
         self.colorList = [2, 3, 4, 5, 8, 7, 6, 2, 9, 15, 14, 13, 16, 12, 10, 11, 0, 1]
 
         for move in self.moveList :
+
             self.C1(self.colorList[moveCnt % 17])
             while self.robotState == BUSYING :
                 self.q.get()

@@ -50,6 +50,20 @@ class Ui_Form(object):
 " }")
         self.btnLoadPic.setText("")
         self.btnLoadPic.setObjectName("btnLoadPic")
+        self.btnLoadTxt = QtWidgets.QPushButton(Form)
+        self.btnLoadTxt.setGeometry(QtCore.QRect(20, 60, 60, 40))
+        self.btnLoadTxt.setStyleSheet(" QPushButton {\n"
+"    border-image: url(:/images/scara-UI-LoadPic_normal.png) 0;\n"
+" }\n"
+" QPushButton:hover {\n"
+"    border-image: url(:/images/scara-UI-LoadPic_hover.png) 0;\n"
+" }\n"
+"\n"
+" QPushButton:pressed  {\n"
+"    border-image: url(:/images/scara-UI-LoadPic_click.png) 0;\n"
+" }")
+        self.btnLoadTxt.setText("")
+        self.btnLoadTxt.setObjectName("btnLoadTxt")
         self.btnPrintPic = QtWidgets.QPushButton(Form)
         self.btnPrintPic.setGeometry(QtCore.QRect(160, 20, 96, 40))
         self.btnPrintPic.setStyleSheet(" QPushButton {\n"

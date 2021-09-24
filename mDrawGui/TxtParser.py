@@ -8,6 +8,7 @@ from PyQt5.QtCore import *
 from RobotUtils import *
 from math import *
 import inspect
+import ast
 
 
 def buildBezierSegment(p0,p1,p2,p3):
@@ -129,7 +130,7 @@ def buildArcSegment(rx,ry,phi,fA,fS,x1,y1,x2,y2):
     return segList
     
 
-class SvgParser():
+class TxtParser():
     def __init__(self, filename, scene, scale=(1,1)):
         self.pathList = []
         self.originPathList = []
@@ -244,6 +245,7 @@ class SvgParser():
                 x = (x-xmin)*scaler+drawRect[0]                    
                 y = (y-ymin)*scaler+drawRect[1]
                 self.pathList[i][j] = (x,y)
+        print("total len",self.pathLen)
         return (dx*scaler,dy*scaler)
     
     # stretch for eggbot surface curve
@@ -722,11 +724,17 @@ class SvgParser():
                     self.tf.pop()
             
     def parse(self, filename):
-        dom = minidom.parse(filename)
-        root = dom.documentElement
-        self.parseChildNodes(root)
+        f = open(filename, "rt")
+        txtlist = []
+        lines = f.readlines()
+        # txtlist = lines
+        for line in lines:
+            txtlist = ast.literal_eval(line)
+        f.close()
+
+        self.pathList = txtlist
 
 if __name__ == '__main__':
-    buildArcSegment(10,10,0,0,10,10,0)
+    buildArcSegment(10, 10, 0, 0, 10, 10, 0)
     
     

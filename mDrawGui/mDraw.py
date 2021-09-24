@@ -6,6 +6,7 @@ import threading
 import SerialCom
 import SvgParser
 import SvgConverter
+import TxtParser
 import ScaraRobot
 import XYRobot
 import CarRobot
@@ -58,6 +59,7 @@ class MainUI(QWidget):
         # link button
         self.ui.btnConnect.clicked.connect(self.connectPort)
         self.ui.btnLoadPic.clicked.connect(self.loadPic)
+        self.ui.btnLoadTxt.clicked.connect(self.loadTxt)
         self.ui.btnClearPic.clicked.connect(self.clearPic)
         self.ui.btnSend.clicked.connect(self.sendCmd)
         self.ui.btnPrintPic.clicked.connect(self.robotPrint)
@@ -138,6 +140,8 @@ class MainUI(QWidget):
     def robotPrint(self):
         if not self.robot.printing:
             self.ui.progressBar.setValue(0)
+            for move in self.robot.moveList :
+                print(move)
             self.robot.printPic()
             self.ui.progressBar.setVisible(True)
             """ todo: add precise time estimation """
@@ -529,12 +533,11 @@ class MainUI(QWidget):
         self.ptrPicRect = None
         self.ptrPicRez = None
 
-
     def loadPic(self, filename = False):
         if self.robot.printing :
             return        
         if filename == False:
-            filename = QFileDialog.getOpenFileName(self, 'Open Svg/Bmp', '', ".svg .bmp(*.svg *.bmp)")[0]
+            filename = QFileDialog.getOpenFileName(self, 'Open Svg', '', ".svg (*.svg)")[0]
         self.dbg(filename)
         if len(filename) == 0 :
             return
@@ -550,7 +553,26 @@ class MainUI(QWidget):
             self.updatePic()
         elif filetype=="bmp" :
             self.showConverter(filename)
-            
+
+    def loadTxt(self, filename = False):
+        if self.robot.printing :
+            return
+        if filename == False:
+            filename = QFileDialog.getOpenFileName(self, 'Open Txt', '', ".txt (*.txt)")[0]
+        self.dbg(filename)
+        if len(filename) == 0 :
+            return
+        self.clearPic()
+        filetype = filename.split(".")[-1] 
+        if filetype == "txt" :
+            self.pic = TxtParser.TxtParser(filename, self.scene)
+            self.ui.labelPic.setVisible(True)
+            self.picX0 = 300
+            self.picY0 = 200
+            self.picWidth = 150
+            self.picHeight = 150
+            self.updatePic()
+
     def showConverter(self, bmpPath) :
         self.converter = SvgConverter.SvgConverter(ParserGUI.Ui_Form,bmpPath,self.robotSig)
 

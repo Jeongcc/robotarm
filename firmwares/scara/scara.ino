@@ -55,11 +55,12 @@ int colorPoint[18][2] = {
   {-307, -224}, {-260, -224}, {-226, -223}, {-190, -218}, {-154, -220}, {-118, -218}
 };
 
-int waterPoint[2] = {-63, -206};
-int spongePoint[2] = {-63, -276};
+int waterPoint[2] = {-360, -200};
+int spongePoint[2] = {-355, -117};
 
-#define ARML1 315
-#define ARML2 210
+// Arm Length
+#define ARML1 168
+#define ARML2 212
 /************** motor movements ******************/
 void stepperMoveA(int dir)
 {
@@ -108,7 +109,7 @@ void scaraInverseKinect(float x, float y)
 long pos1, pos2;
 void thetaToSteps(float th1, float th2)
 {
-  pos1 = round(th1 / PI * STEPS_PER_CIRCLE / 2) ;
+  pos1 = round(th1 / PI * 18000.0f / 2) ;
   pos2 = round(th2 / PI * STEPS_PER_CIRCLE / 2);
 }
 
@@ -384,29 +385,29 @@ void parseCcode(char * cmd)
   str = strtok_r(cmd, " ", &tmp);
   int colorpos = atoi(tmp);
 
-  Serial.println("Move to start point start");
-  tarX =-(roboSetup.data.arm0len + roboSetup.data.arm1len - 0.01); 
-  tarY = 0;
-  prepareMove();
-  Serial.println("Move to start point complete");
-  servoPen.write(roboSetup.data.penUpPos + 10);
+  // Serial.println("Move to start point start");
+  // tarX =-(roboSetup.data.arm0len + roboSetup.data.arm1len - 0.01); 
+  // tarY = 0;
+  // prepareMove();
+  // Serial.println("Move to start point complete");
+  // servoPen.write(roboSetup.data.penUpPos + 10);
   
-  brushClean();
+  // brushClean();
 
-  Serial.print("Coloring Brush start : "); Serial.println((int)colorpos);
-  tarX = colorPoint[colorpos][0];
-  tarY = colorPoint[colorpos][1];
-  prepareMove();
-  Serial.print("Pen Color Pos : ");
-  Serial.println((int)roboSetup.data.penColorPos);
-  servoPen.write(roboSetup.data.penColorPos);
-  for (int i = 0; i < 8; i++){
-    tarX = colorPoint[colorpos][0] + 5;
-    prepareMove();
-    tarX = colorPoint[colorpos][0] - 5;
-    prepareMove();
-  }
-  Serial.print("Coloring Brush complete : "); Serial.println((int)colorpos);
+  // Serial.print("Coloring Brush start : "); Serial.println((int)colorpos);
+  // tarX = colorPoint[colorpos][0];
+  // tarY = colorPoint[colorpos][1];
+  // prepareMove();
+  // Serial.print("Pen Color Pos : ");
+  // Serial.println((int)roboSetup.data.penColorPos);
+  // servoPen.write(roboSetup.data.penColorPos);
+  // for (int i = 0; i < 8; i++){
+  //   tarX = colorPoint[colorpos][0] + 5;
+  //   prepareMove();
+  //   tarX = colorPoint[colorpos][0] - 5;
+  //   prepareMove();
+  // }
+  // Serial.print("Coloring Brush complete : "); Serial.println((int)colorpos);
   servoPen.write(roboSetup.data.penUpPos);
 }
 
@@ -538,7 +539,7 @@ void initRobotSetup()
     roboSetup.data.motoBDir = 0;
     roboSetup.data.arm0len = ARML1;
     roboSetup.data.arm1len = ARML2;
-    roboSetup.data.speed = 75;
+    roboSetup.data.speed = 80;
     roboSetup.data.penUpPos = 130;
     roboSetup.data.penDownPos = 90;
     roboSetup.data.penColorPos = 90;
