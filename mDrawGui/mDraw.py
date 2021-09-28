@@ -47,6 +47,8 @@ class MainUI(QWidget):
         self.picY0 = 200
         self.picWidth = 0
         self.picHeight = 0
+        self.svgWidth = 0
+        self.svgHeight = 0
         self.initUI()
         
     def initUI(self):
@@ -126,7 +128,7 @@ class MainUI(QWidget):
         
         self.initGraphView()
         self.robot.initRobotCanvas()
-        self.setWindowTitle('mDraw V1.2.2')
+        self.setWindowTitle('Valuable mDraw V1.2.2')
         self.setWindowIcon(QtGui.QIcon('mDrawIcon.png'))
         self.show()
         # start refresh thread
@@ -165,47 +167,47 @@ class MainUI(QWidget):
             self.switchPrintButton("Go")
 
 
-    def switchPrintButton(self,s):
-        if s=="Go":
+    def switchPrintButton(self, s):
+        if s == "Go" :
             self.ui.btnPrintPic.setStyleSheet(u" QPushButton {\n"
-"    border-image:url(:/images/scara-UI-Start-normal.png) 0;\n"
-" }\n"
-"\n"
-" QPushButton:hover {\n"
-"    border-image: url(:/images/scara-UI-Start-hover.png) 0;\n"
-" }\n"
-"\n"
-" QPushButton:pressed  {\n"
-"    border-image: url(:/images/scara-UI-Start-click.png) 0;\n"
-" }\n"
-"\n"
-"")
-        else:
+                                                "    border-image:url(:/images/scara-UI-Start-normal.png) 0;\n"
+                                                " }\n"
+                                                "\n"
+                                                " QPushButton:hover {\n"
+                                                "    border-image: url(:/images/scara-UI-Start-hover.png) 0;\n"
+                                                " }\n"
+                                                "\n"
+                                                " QPushButton:pressed  {\n"
+                                                "    border-image: url(:/images/scara-UI-Start-click.png) 0;\n"
+                                                " }\n"
+                                                "\n"
+                                                "")
+        else :
             self.ui.btnPrintPic.setStyleSheet(u" QPushButton {\n"
-"    border-image:url(:/images/scara-UI-Suspendend-normal.png) 0;\n"
-" }\n"
-"\n"
-" QPushButton:hover {\n"
-"    border-image: url(:/images/scara-UI-Suspendend-hover.png) 0;\n"
-" }\n"
-"\n"
-" QPushButton:pressed  {\n"
-"    border-image: url(:/images/scara-UI-Suspendend-click.png) 0;\n"
-" }\n"
-"\n"
-"")
+                                                "    border-image:url(:/images/scara-UI-Suspendend-normal.png) 0;\n"
+                                                " }\n"
+                                                "\n"
+                                                " QPushButton:hover {\n"
+                                                "    border-image: url(:/images/scara-UI-Suspendend-hover.png) 0;\n"
+                                                " }\n"
+                                                "\n"
+                                                " QPushButton:pressed  {\n"
+                                                "    border-image: url(:/images/scara-UI-Suspendend-click.png) 0;\n"
+                                                " }\n"
+                                                "\n"
+                                                "")
     
     def userSetSvgRect(self):
-        ratio = self.picHeight/self.picWidth
+        ratio = self.picHeight / self.picWidth
         sender = self.sender().objectName()
         if sender == "lineSvgWidth":
             strW = str(self.ui.lineSvgWidth.text())
             w = float(strW)
-            h = w*ratio
+            h = w * ratio
         else:
             strH = str(self.ui.lineSvgHeight.text())
             h = float(strH)
-            w = h/ratio
+            w = h / ratio
         self.picWidth = w
         self.picHeight = h
         self.updatePic()
@@ -215,21 +217,21 @@ class MainUI(QWidget):
         strY = str(self.ui.labelYpos.text())
         x = float(strX)
         y = -float(strY)
-        pos = QtCore.QPointF(x,y)
-        self.robot.moveTo(pos,True)
+        pos = QtCore.QPointF(x, y)
+        self.robot.moveTo(pos, True)
             
     def graphMouseRelease(self,event):
         #self.userPaint.lineTo(event.pos())
         #self.pathptr.setPath(self.userPaint)
-        if self.tempPicRect==None:
-            if self.firstClickMillis==0:
+        if self.tempPicRect == None:
+            if self.firstClickMillis == 0:
                 self.firstClickMillis = int(round(time.time() * 1000))
             else:
                 millisDiff = int(round(time.time() * 1000)) - self.firstClickMillis
                 self.firstClickMillis = 0
                 #print("click",millisDiff)
-                if millisDiff<400:
-                    pos = event.pos()-self.robotCent
+                if millisDiff < 400:
+                    pos = event.pos() - self.robotCent
                     try:
                         self.robot.moveTo(pos)
                     except Exception as e:
@@ -237,7 +239,6 @@ class MainUI(QWidget):
                         pass
                 else:
                     self.firstClickMillis = int(round(time.time() * 1000))
-                    
         else:
             if self.mouseOverPic:
                 w = self.picWidth
@@ -246,7 +247,7 @@ class MainUI(QWidget):
                 px,py = pos.x(),pos.y()
                 x = px-self.rectBias[0]
                 y = py-self.rectBias[1]
-                self.tempPicRect.setRect(x,y,w,h)
+                self.tempPicRect.setRect(x, y, w, h)
                 self.scene.removeItem(self.tempPicRect)
                 self.tempPicRect = None
                 self.picX0 = x
@@ -292,8 +293,8 @@ class MainUI(QWidget):
                 self.ui.lineSvgWidth.setText("%.2f" %w)
                 self.ui.lineSvgHeight.setText("%.2f" %h)
                 # let label follow mouse positions
-                self.ui.labelPic.move(QPoint(x+w+20,y+h+20))
-                self.tempPicRect.setRect(x,y,w,h)
+                self.ui.labelPic.move(QPoint(x + w + 20, y + h + 20))
+                self.tempPicRect.setRect(x, y, w, h)
         else: # restore mouse icon
             pos = event.pos()
             x = self.picX0
@@ -306,43 +307,46 @@ class MainUI(QWidget):
                     QApplication.setOverrideCursor(QCursor(Qt.SizeAllCursor))
                     self.mouseOverPic = True
             elif px>(x+w) and px<(x+w+5) and py>(y+h) and py<(y+h+5):
-                if self.mouseResizePic==False:
+                if self.mouseResizePic == False:
                     QApplication.setOverrideCursor(QCursor(Qt.SizeFDiagCursor))
                     self.mouseResizePic = True
             else:
-                if self.mouseOverPic==True or self.mouseResizePic==True:
+                if self.mouseOverPic == True or self.mouseResizePic == True:
                     QApplication.restoreOverrideCursor()
                     QApplication.restoreOverrideCursor()
                     self.mouseOverPic = False
                     self.mouseResizePic = False
                  
         
-    def graphMouseClick(self,event):
-        if self.ptrPicRect==None: return
+    def graphMouseClick(self, event):
+        if self.ptrPicRect == None: return
         pos = event.pos()
         x = self.picX0
         y = self.picY0
         w = self.picWidth
         h = self.picHeight
-        px,py = pos.x(),pos.y()
-        if self.mouseOverPic or self.mouseResizePic:
-            pen = QPen(QColor(0, 169, 231),3,QtCore.Qt.DashDotLine)
-            self.tempPicRect =  self.scene.addRect(x,y,w,h,pen)
-            self.rectBias = (px-x,py-y)
+        px, py = pos.x(), pos.y()
+        if self.mouseOverPic or self.mouseResizePic :
+            pen = QPen(QColor(0, 169, 231), 3, QtCore.Qt.DashDotLine)
+            self.tempPicRect =  self.scene.addRect(x, y, w, h, pen)
+            self.rectBias = (px - x, py - y)
+
 
     def sceneRefresh(self):
         while True:
             self.sceneUpdateSig.emit()
             time.sleep(0.05)
-    
+
+
     def toggleComPort(self):
         time.sleep(2)
         self.disconnectPort()
         time.sleep(0.5)
         self.connectPort()
-    
-    def parseRobotSig(self,msg):
-        msg=str(msg)
+
+
+    def parseRobotSig(self, msg):
+        msg = str(msg)
         if "OK" in msg:
             self.robot.robotState = IDLE
             self.ui.labelMachineState.setText("IDLE")
@@ -390,7 +394,8 @@ class MainUI(QWidget):
             self.robot.parseEcho(msg)
         else:
             self.dbg(msg)
-    
+
+
     def disconnectPort(self):
         if self.comm==None:
             return
@@ -401,11 +406,13 @@ class MainUI(QWidget):
         self.dbg("port closed")
         self.comm = None
         return
-    
+
+
     def portComboPressed(self, event):
         self.refreshCom()
         self.ui.portCombo.showPopup()
-   
+
+
     def tabChanged(self,tabindex):
         #print "tab changed",tabindex
         ssTemplate = "background-color: rgb(247, 247, 247);border-image: url(:/images/model.png);"
@@ -433,6 +440,7 @@ class MainUI(QWidget):
         self.robot.parseEcho(self.bufferedM10msg)
         self.bufferedM10msg = ""
    
+
     def dbg(self,log,level=DEBUG_NORMAL):
         print(level,log)
         if level == DEBUG_ERR:
@@ -502,7 +510,7 @@ class MainUI(QWidget):
         self.ui.portCombo.clear()
         serPorts = SerialCom.serialList()
         for s in serPorts:
-            self.commList[s]="COM"
+            self.commList[s] = "COM"
             self.ui.portCombo.addItem(s)
         #self.socket.refresh()
 
@@ -514,7 +522,7 @@ class MainUI(QWidget):
     def sendCmd(self, cmd=""):
         if self.comm == None: return
         if cmd == False:
-            cmd = str(self.ui.lineSend.text())+'\n'
+            cmd = str(self.ui.lineSend.text()) + '\n'
         self.comm.send(cmd)
 
 
@@ -522,7 +530,7 @@ class MainUI(QWidget):
         if self.robot.printing:
             return
         if self.pic == None: return
-        if self.ptrPicRect!=None:
+        if self.ptrPicRect != None:
             for path in self.pic.ptrList:
                 self.scene.removeItem(path)
             self.scene.removeItem(self.ptrPicRect)
@@ -532,6 +540,7 @@ class MainUI(QWidget):
         self.picHeight = 0
         self.ptrPicRect = None
         self.ptrPicRez = None
+
 
     def loadPic(self, filename = False):
         if self.robot.printing :
@@ -546,13 +555,14 @@ class MainUI(QWidget):
         if filetype == "svg" :
             self.pic = SvgParser.SvgParser(filename, self.scene)
             self.ui.labelPic.setVisible(True)
-            self.picX0 = 300
-            self.picY0 = 200
-            self.picWidth = 150
-            self.picHeight = 150
+            self.picX0 = 172
+            self.picY0 = 378
+            self.picWidth = 300
+            self.picHeight = 220
             self.updatePic()
-        elif filetype=="bmp" :
-            self.showConverter(filename)
+            self.rollAntiClockwise()
+            self.robotPrint()
+
 
     def loadTxt(self, filename = False):
         if self.robot.printing :
@@ -567,48 +577,52 @@ class MainUI(QWidget):
         if filetype == "txt" :
             self.pic = TxtParser.TxtParser(filename, self.scene)
             self.ui.labelPic.setVisible(True)
-            self.picX0 = 300
-            self.picY0 = 200
-            self.picWidth = 150
-            self.picHeight = 150
+            self.picX0 = 172
+            self.picY0 = 378
+            self.picWidth = 300
+            self.picHeight = 220
             self.updatePic()
+            self.rollAntiClockwise()
+            self.robotPrint()
+
 
     def showConverter(self, bmpPath) :
-        self.converter = SvgConverter.SvgConverter(ParserGUI.Ui_Form,bmpPath,self.robotSig)
+        self.converter = SvgConverter.SvgConverter(ParserGUI.Ui_Form, bmpPath, self.robotSig)
+
 
     def updatePic(self) :
         x = self.picX0
         y = self.picY0
         w = self.picWidth
         h = self.picHeight
+
         if self.ptrPicRect != None :
             self.scene.removeItem(self.ptrPicRect)
             self.scene.removeItem(self.ptrPicRez)
         pen = QPen(QColor(0, 169, 231))
+
         if self.pic == None : return
-        for path in self.pic.ptrList:
-            self.scene.removeItem(path)
-        (w,h) = self.pic.resize((x,y,w,h)) # get rect of target svg
-        #stretch for eggbot
-        #ycent = self.robot.origin[1]+self.robot.height/2
-        #if self.robot.__class__.__name__=="EggBot" and self.robot.stretch!=None:
-        #    ycent = y+h/2
-        #    self.pic.stretch(ycent,self.robot.stretch)
         
-        self.picWidth = w
-        self.picHeight = h
+        for path in self.pic.ptrList :
+            self.scene.removeItem(path)
+        
+        print("##### Check w, h 1 #####", w, h)
+        (w, h) = self.pic.resize((x, y, w, h)) # get rect of target svg
+        print("##### Check w, h 2 #####", w, h)
+    
         #self.ui.labelPic.setText(" w: %d mm\n h: %d mm" %(w,h))
         self.ui.lineSvgWidth.setText("%.2f" % w)
         self.ui.lineSvgHeight.setText("%.2f" % h)
-        self.ui.labelPic.move(QPoint(x + w + 20, y + h + 20))
+        self.ui.labelPic.move(QPoint(int(x + w + 20), int(y + h + 20)))
         self.ptrPicRect = self.scene.addRect(x, y, w, h, pen) # refresh boundary
         self.ptrPicRez = self.scene.addRect(x + w, y + h, 5, 5, pen)
+        print("x position, y position, ", x, y)
         self.robot.moveList = self.pic.pathList
         self.pic.plotToScene()
 
 
     def xReflect(self):
-        if self.pic==None:
+        if self.pic == None :
             return
         """
         1  0  0
@@ -616,17 +630,18 @@ class MainUI(QWidget):
         0  0  1
         """
         newtf = [0,0,0,0,0,0]
-        newtf[0] = 1*self.pic.usertf[0]
-        newtf[1] = -1*self.pic.usertf[1]
-        newtf[2] = 1*self.pic.usertf[2]
-        newtf[3] = -1*self.pic.usertf[3]
-        newtf[4] = 1*self.pic.usertf[4]
-        newtf[5] = -1*self.pic.usertf[5]
+        newtf[0] = 1 * self.pic.usertf[0]
+        newtf[1] = -1 * self.pic.usertf[1]
+        newtf[2] = 1 * self.pic.usertf[2]
+        newtf[3] = -1 * self.pic.usertf[3]
+        newtf[4] = 1 * self.pic.usertf[4]
+        newtf[5] = -1 * self.pic.usertf[5]
         self.pic.usertf = newtf
         self.updatePic()
-        
+      
+
     def yReflect(self):
-        if self.pic==None:
+        if self.pic == None:
             return
         """
        -1  0  0
@@ -634,18 +649,18 @@ class MainUI(QWidget):
         0  0  1
         """
         newtf = [0,0,0,0,0,0]
-        newtf[0] = -1*self.pic.usertf[0]
-        newtf[1] = 1*self.pic.usertf[1]
-        newtf[2] = -1*self.pic.usertf[2]
-        newtf[3] = 1*self.pic.usertf[3]
-        newtf[4] = -1*self.pic.usertf[4]
-        newtf[5] = 1*self.pic.usertf[5]
+        newtf[0] = -1 * self.pic.usertf[0]
+        newtf[1] = 1 * self.pic.usertf[1]
+        newtf[2] = -1 * self.pic.usertf[2]
+        newtf[3] = 1 * self.pic.usertf[3]
+        newtf[4] = -1 * self.pic.usertf[4]
+        newtf[5] = 1 * self.pic.usertf[5]
         self.pic.usertf = newtf
         self.updatePic()
         
         
     def rollAntiClockwise(self):
-        if self.pic==None:
+        if self.pic == None:
             return
         """
         0  1  0
@@ -653,12 +668,12 @@ class MainUI(QWidget):
         0  0  1
         """
         newtf = [0,0,0,0,0,0]
-        newtf[0] = 1*self.pic.usertf[1]
-        newtf[1] = -1*self.pic.usertf[0]
-        newtf[2] = 1*self.pic.usertf[3]
-        newtf[3] = -1*self.pic.usertf[2]
-        newtf[4] = 1*self.pic.usertf[5]
-        newtf[5] = -1*self.pic.usertf[4]
+        newtf[0] = 1 * self.pic.usertf[1]
+        newtf[1] = -1 * self.pic.usertf[0]
+        newtf[2] = 1 * self.pic.usertf[3]
+        newtf[3] = -1 * self.pic.usertf[2]
+        newtf[4] = 1 * self.pic.usertf[5]
+        newtf[5] = -1 * self.pic.usertf[4]
         self.pic.usertf = newtf
         w = self.picWidth
         h = self.picHeight
@@ -668,7 +683,7 @@ class MainUI(QWidget):
         
         
     def rollClockwise(self):
-        if self.pic==None:
+        if self.pic == None:
             return
         """
         0 -1  0
@@ -676,12 +691,12 @@ class MainUI(QWidget):
         0  0  1
         """
         newtf = [0,0,0,0,0,0]
-        newtf[0] = -1*self.pic.usertf[1]
-        newtf[1] = 1*self.pic.usertf[0]
-        newtf[2] = -1*self.pic.usertf[3]
-        newtf[3] = 1*self.pic.usertf[2]
-        newtf[4] = -1*self.pic.usertf[5]
-        newtf[5] = 1*self.pic.usertf[4]
+        newtf[0] = -1 * self.pic.usertf[1]
+        newtf[1] = 1 * self.pic.usertf[0]
+        newtf[2] = -1 * self.pic.usertf[3]
+        newtf[3] = 1 * self.pic.usertf[2]
+        newtf[4] = -1 * self.pic.usertf[5]
+        newtf[5] = 1 * self.pic.usertf[4]
         self.pic.usertf = newtf
         w = self.picWidth
         h = self.picHeight
@@ -704,9 +719,9 @@ class MainUI(QWidget):
 
     def laserValue(self):
         value = int(self.ui.slideLaserPower.value())
-        laserpwm = value*255/100
+        laserpwm = value * 255 / 100
         self.ui.labelLaserPower.setText(str(value))
-        if self.ui.radioLaserMode.isChecked()==False:
+        if self.ui.radioLaserMode.isChecked() == False :
             return
         self.robot.M4(laserpwm)
 
@@ -717,8 +732,8 @@ class MainUI(QWidget):
         self.robot.laserBurnDelay = delay
 
 
-    def laserMode(self,txt=False):
-        if txt==False:
+    def laserMode(self, txt = False) :
+        if txt == False :
             if self.ui.radioLaserMode.isChecked():
                 txt = "On"
             else:

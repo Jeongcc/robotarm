@@ -59,8 +59,8 @@ int waterPoint[2] = {-360, -200};
 int spongePoint[2] = {-355, -117};
 
 // Arm Length
-#define ARML1 168
-#define ARML2 212
+#define ARML1 248
+#define ARML2 206
 /************** motor movements ******************/
 void stepperMoveA(int dir)
 {
@@ -109,7 +109,7 @@ void scaraInverseKinect(float x, float y)
 long pos1, pos2;
 void thetaToSteps(float th1, float th2)
 {
-  pos1 = round(th1 / PI * 18000.0f / 2) ;
+  pos1 = round(th1 / PI * STEPS_PER_CIRCLE / 2) ;
   pos2 = round(th2 / PI * STEPS_PER_CIRCLE / 2);
 }
 
@@ -540,8 +540,8 @@ void initRobotSetup()
     roboSetup.data.arm0len = ARML1;
     roboSetup.data.arm1len = ARML2;
     roboSetup.data.speed = 80;
-    roboSetup.data.penUpPos = 130;
-    roboSetup.data.penDownPos = 90;
+    roboSetup.data.penUpPos = 160;
+    roboSetup.data.penDownPos = 120;
     roboSetup.data.penColorPos = 90;
     roboSetup.data.spongePos = 140;
     syncRobotSetup();

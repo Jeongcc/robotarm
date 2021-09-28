@@ -90,7 +90,7 @@ class RobotSetupUI(QWidget):
         self.robot.motoBDir = 0
         self.updateUI()
 
-    def setMotorBcck(self,event):
+    def setMotorBcck(self, event):
         self.robot.motoBDir = 1
         self.updateUI()
 
@@ -102,13 +102,13 @@ class Scara(QGraphicsItem):
         self.ui = ui
         self.color = QColor(QtCore.Qt.lightGray)
         # Arm Length
-        self.L1 = 168.0
-        self.L2 = 212.0
+        self.L1 = 248.0
+        self.L2 = 206.0
         self.speed = 50
         self.scaler = 1.0
         self.motoADir = 0
         self.motoBDir = 0
-        self.pos = (-(self.L1 + self.L2-  0.01), 0.0)
+        self.pos = (-(self.L1 + self.L2 - 0.01), 0.0)
         #self.pos=(-200.0,0.0)
         # theta1 and 2 in clock wise direction
         self.th = self.scaraInverseKinect(self.pos)

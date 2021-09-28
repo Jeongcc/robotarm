@@ -142,6 +142,8 @@ class SvgParser():
         self.scene = scene
         self.scale = scale
         self.tf = []
+        self.originHeight = 0
+        self.originWidth = 0
         self.usertf = [1,0,0,1,0,0]
         self.parse(filename)
     
@@ -183,14 +185,18 @@ class SvgParser():
             ptr = self.scene.addPath(tmpPath, pen = pen)
             self.ptrList.append(ptr)
 
-    def resize(self, drawRect = (150,150,150,150)) :
+    def resize(self, drawRect = (150, 150, 150, 150)) :
         #self.pathList = copy.deepcopy(self.originPathList)
         self.pathList = []
         self.pathLen = 0
         
         # avoid the deep copy
+        firstPath = [(0,0)]
+        finalPath = [(self.originWidth, self.originHeight)]
+        self.pathList.append(firstPath)
         for p in self.originPathList :
             self.pathList.append(list(p))
+        self.pathList.append(finalPath)
         
         #print("resize",len(self.pathList))
         #print(self.originPathList[0][0])
@@ -202,63 +208,63 @@ class SvgParser():
             for j in range(len(self.pathList[i])) :
                 x = self.pathList[i][j][0]
                 y = self.pathList[i][j][1]
-                x1=self.usertf[0]*x+self.usertf[2]*y+self.usertf[4]
-                y1=self.usertf[1]*x+self.usertf[3]*y+self.usertf[5]
-                self.pathList[i][j] = (x1,y1)
+                x1 = self.usertf[0] * x + self.usertf[2] * y + self.usertf[4]
+                y1 = self.usertf[1] * x + self.usertf[3] * y + self.usertf[5]
+                self.pathList[i][j] = (x1, y1)
         
         #print(self.pathList[0][0])
         
         (x, y) = self.pathList[0][0]
-        (x0, y0) = (x,y)
-        xmin = x*self.scale[0]
-        xmax = x*self.scale[0]
-        ymin = y*self.scale[1]
-        ymax = y*self.scale[1]
+        (x0, y0) = (x, y)
+        xmin = x * self.scale[0]
+        xmax = x * self.scale[0]
+        ymin = y * self.scale[1]
+        ymax = y * self.scale[1]
         # find max min pos on x and y
-        for line in self.pathList:
+        for line in self.pathList :
             for p in line:
-                x = p[0]*self.scale[0]
-                y = p[1]*self.scale[1]
-                tmpdx = x-x0
-                tmpdy = y-y0
-                self.pathLen+=sqrt(tmpdx*tmpdx+tmpdy*tmpdy)
-                (x0,y0) = (x,y)
-                if x<xmin:
+                x = p[0] * self.scale[0]
+                y = p[1] * self.scale[1]
+                tmpdx = x - x0
+                tmpdy = y - y0
+                self.pathLen += sqrt(tmpdx * tmpdx + tmpdy * tmpdy)
+                (x0, y0) = (x, y)
+                if x < xmin:
                     xmin = p[0]
-                if x>xmax:
+                if x > xmax:
                     xmax = p[0]
-                if y<ymin:
+                if y < ymin:
                     ymin = p[1]
-                if y>ymax:
+                if y > ymax:
                     ymax = p[1]
-        #print "size",xmin,ymin,xmax,ymax
-        dx = xmax-xmin
-        dy = ymax-ymin
-        self.whratio = dx/dy
-        scaler = min(drawRect[2]/dx,drawRect[3]/dy)
+        print("size", xmin, ymin, xmax, ymax)
+        dx = xmax - xmin
+        dy = ymax - ymin
+        self.whratio = dx / dy
+        scaler = min(drawRect[2] / dx, drawRect[3] / dy)
 
         for i in range(len(self.pathList)):
             for j in range(len(self.pathList[i])):
-                x = self.pathList[i][j][0]*self.scale[0]
-                y = self.pathList[i][j][1]*self.scale[1]
-                x = (x-xmin)*scaler+drawRect[0]                    
-                y = (y-ymin)*scaler+drawRect[1]
-                self.pathList[i][j] = (x,y)
-        return (dx*scaler,dy*scaler)
+                x = self.pathList[i][j][0] * self.scale[0]
+                y = self.pathList[i][j][1] * self.scale[1]
+                x = (x - xmin) * scaler + drawRect[0]                    
+                y = (y - ymin) * scaler + drawRect[1]
+                self.pathList[i][j] = (x, y)
+        return (dx * scaler, dy * scaler)
     
     # stretch for eggbot surface curve
     # eq: x^2/a^2+y^2/b^2 = 1
     # todo: apply a real egg shape equation: http://www.mathematische-basteleien.de/eggcurves.htm
     # http://www.geocities.jp/nyjp07/Egg/index_egg_E.html
-    def stretch(self,ycent,h,da=20):
-        a = h+da
+    def stretch(self, ycent, h, da = 20):
+        a = h + da
         for i in range(len(self.pathList)):
             for j in range(len(self.pathList[i])):
-                (x,y) = self.pathList[i][j]
-                y0=y-ycent
-                x0 = h-sqrt(1-y0*y0/a/a)*h
-                x = x+x0
-                self.pathList[i][j] = (x,y)
+                (x, y) = self.pathList[i][j]
+                y0 = y - ycent
+                x0 = h - sqrt(1 - y0 * y0 / a / a ) * h
+                x = x + x0
+                self.pathList[i][j] = (x, y)
     
     def parsePath(self, node):
         pbuff = []
@@ -281,7 +287,7 @@ class SvgParser():
         x0 = x; y0 = y;
         #path = QtGui.QPainterPath()
         #print ">> path:",ss
-        print("##ss len check", len(ss))
+        # print("##ss len check", len(ss))
         while ptr < len(ss):
             #print "parse",ss[i]
             if ss[ptr].isalpha():
@@ -441,22 +447,22 @@ class SvgParser():
                         pbuff=[(ax,ay)]
                         x=ax;y=ay
                         curvecnt = 0
-                elif state=="s":
-                    dx=float(ss[ptr])
-                    dy=float(ss[ptr+1])
-                    ptr+=2
-                    curvecnt+=1
-                    if curvecnt==1:
+                elif state == "s" :
+                    dx = float(ss[ptr])
+                    dy = float(ss[ptr+1])
+                    ptr += 2
+                    curvecnt += 1
+                    if curvecnt == 1:
                         # set control point
-                        if (prevstate=="S" or prevstate=="s" or prevstate=="C" or prevstate=="c"):
-                            controlPoint = (2*pbuff[0][0]-lastControl[0],2*pbuff[0][1]-lastControl[1])
+                        if (prevstate == "S" or prevstate == "s" or prevstate == "C" or prevstate == "c"):
+                            controlPoint = (2 * pbuff[0][0] - lastControl[0], 2 * pbuff[0][1] - lastControl[1])
                             pbuff.append(controlPoint)
                             pbuff.append((x+dx,y+dy))
                         else:
                             pbuff.append(pbuff[0]) # if prev state not bez-curve, use current point as first control point
                             pbuff.append((x+dx,y+dy))
                             
-                    if curvecnt==2:
+                    if curvecn == 2:
                         # set target point
                         pbuff.append((x+dx,y+dy))
                         bzseg = buildBezierSegment(pbuff[0],pbuff[1],pbuff[2],pbuff[3])
@@ -506,14 +512,14 @@ class SvgParser():
                     ax=float(ss[ptr])+self.xbias
                     ay=float(ss[ptr+1])+self.ybias
                     ptr+=2
-                    curvecnt+=1
+                    curvecnt += 1
                     #print ">>\tL:x",ax,"y",ay,"cnt",curvecnt
-                    x=ax;y=ay
+                    x = ax; y = ay
                     #path.lineTo(ax,ay)
                     self.lineTo(ax,ay)
                 else:
-                    ptr+=1
-                    print("unknow state",state)
+                    ptr += 1
+                    # print("unknow state",state)
         return
         
     def parseRect(self,node):
@@ -534,7 +540,7 @@ class SvgParser():
         x2 = float(node.getAttribute("x2"))+self.xbias
         y1 = float(node.getAttribute("y1"))+self.ybias
         y2 = float(node.getAttribute("y2"))+self.ybias
-        print(">> Line",x1,y1,x2,y2)
+        # print(">> Line",x1,y1,x2,y2)
         #path = QtGui.QPainterP ath()
         #path.moveTo(x1,y1)
         self.moveTo(x1,y1)
@@ -550,7 +556,7 @@ class SvgParser():
         tmp = []
         pstr = node.getAttribute("points")
         points = pstr.split(" ")
-        print(">> polygon:")
+        # print(">> polygon:")
         isinit=0
         #path = QtGui.QPainterPath()
         initx=0
@@ -558,7 +564,7 @@ class SvgParser():
         for p in points:
             if len(p)==0: continue
             xstr,ystr = p.split(',')
-            print(">>\t",xstr,ystr)
+            # print(">>\t",xstr,ystr)
             x=float(xstr)+self.xbias
             y=float(ystr)+self.ybias
             tmp.append((x,y))
@@ -583,14 +589,14 @@ class SvgParser():
         tmp = []
         pstr = node.getAttribute("points")
         points = pstr.split(" ")
-        print(">> polyline:")
+        # print(">> polyline:")
         isinit=0
         #path = QtGui.QPainterPath()
         #pen(0)
         for p in points:
             if len(p)==0: continue
             xstr,ystr = p.split(',')
-            print(">>\t",xstr,ystr)
+            # print(">>\t",xstr,ystr)
             x=float(xstr)+self.xbias
             y=float(ystr)+self.ybias
             tmp.append((x,y))
@@ -622,7 +628,7 @@ class SvgParser():
             y = r*sin(theta)+cy
             dx=x-px;dy=y-py;
             dis = sqrt(dx*dx+dy*dy)
-            if dis>1:
+            if dis > 1:
                 self.lineTo(x, y)
                 px=x;py=y;
     
@@ -633,7 +639,7 @@ class SvgParser():
             return None
         attrs = sib._attrs
         if "transform" in attrs:
-            print("trans",attrs)
+            # print("trans",attrs)
             tf = [1,0,0,1,0,0]
             trans = attrs["transform"].value.split()
             for t in trans:
@@ -684,10 +690,15 @@ class SvgParser():
             return None
         
     def parseNode(self, node, deep):
-        print(" " * deep, ">>", node.nodeName, node.nodeType)
+        # print(" " * deep, ">>", node.nodeName, node.nodeType)
         tf = None
         if node.nodeType == 1 :
             tf = self.parseTransform(node)
+        if node.nodeName == "svg" :
+            print("svg node here")
+            width = node.getAttribute("width")
+            height = node.getAttribute("height")
+            print("check width height", width, height)
         if node.nodeName == "path" :
             self.parsePath(node)
         elif node.nodeName == "rect" :
@@ -700,12 +711,12 @@ class SvgParser():
             self.parsePolyline(node)
         elif node.nodeName == "circle" :
             self.parseCircle(node)
-        else:
-            print(" " * deep, "unknow", node.nodeName)
+        # else:
+        #     print(" " * deep, "unknow", node.nodeName)
         return tf
     
     def parseChildNodes(self, node, deep = 1):
-        print(" " * deep, "parse->", node.nodeName)
+        # print(" " * deep, "parse->", node.nodeName)
         # print(inspect.getmembers(node))
         # escape marker
         if node.nodeName == "marker" or node.nodeName == "clipPath":
@@ -723,10 +734,14 @@ class SvgParser():
             
     def parse(self, filename):
         dom = minidom.parse(filename)
+        svg_ele = dom.getElementsByTagName("svg")
+        self.originWidth = int(svg_ele[0].getAttribute("width").split(".")[0])
+        self.originHeight = int(svg_ele[0].getAttribute("height").split(".")[0])
+        
         root = dom.documentElement
         self.parseChildNodes(root)
 
 if __name__ == '__main__':
-    buildArcSegment(10,10,0,0,10,10,0)
+    buildArcSegment(10, 10, 0, 0, 10, 10, 0)
     
     
