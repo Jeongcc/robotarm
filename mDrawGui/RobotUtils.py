@@ -6,6 +6,9 @@ DEBUG_ERR = -3
 IDLE = 0
 BUSYING = 1
 
+SKETCH = 10
+COLOR = 20
+
 motorSelectedStyle = "border: 1px solid rgb(67,67,67);\r\nborder-radius: 4px;\r\n"
 
 class WorkInThread(threading.Thread):

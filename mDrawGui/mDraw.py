@@ -2,21 +2,14 @@
 import sys
 import os
 import threading
-# import Serial
 import SerialCom
 import SvgParser
 import SvgConverter
 import TxtParser
 import ScaraRobot
-import XYRobot
-import CarRobot
-import WallRobot
-import EggBot
 import ParserGUI
 import HexDownloader
-import WireHelper
-import WireGui
-import WireGui_XY
+
 
 from PyQt5.QtGui import*
 from PyQt5.QtWidgets import *
@@ -27,7 +20,7 @@ from RobotUtils import *
 import time
 import math
 
-robotVersion="1.15 2015-7-15"
+robotVersion = "1.15 2015-7-15"
 
 class MainUI(QWidget):
     sceneUpdateSig = pyqtSignal()
@@ -49,6 +42,9 @@ class MainUI(QWidget):
         self.picHeight = 0
         self.svgWidth = 0
         self.svgHeight = 0
+        self.colorDict = {"#000000" : 0, "#0D072E" : 1, "#190F3A" : 2, "#012362" : 3, "#354C96" : 4, "#1E468E": 5,
+                        "#004547" : 6, "#03753A" : 7, "#4F93B8" : 8, "#95244D" : 9, "#690E20" : 10, "#461920" : 11, 
+                        "#961D12" : 12, "#946314" : 13, "#B03402" : 14, "#C3732C" : 15, "#BEBC46" : 16, "#F2F2F2" : 17}
         self.initUI()
         
     def initUI(self):
@@ -380,14 +376,6 @@ class MainUI(QWidget):
             self.dbg(msg, DEBUG_DEBUG)
             if "MSCARA" in msg and str(self.ui.robotCombo.currentText())!="mScara":
                 self.ui.robotCombo.setCurrentIndex(0)
-            elif "MSPIDER" in msg and str(self.ui.robotCombo.currentText())!="mSpider":
-                self.ui.robotCombo.setCurrentIndex(1)
-            elif "XY" in msg and str(self.ui.robotCombo.currentText())!="XY":
-                self.ui.robotCombo.setCurrentIndex(4)
-            elif "EGG" in msg and str(self.ui.robotCombo.currentText())!="mEggBot":
-                self.ui.robotCombo.setCurrentIndex(2)
-            elif "MCAR" in msg and str(self.ui.robotCombo.currentText())!="mCar":
-                self.ui.robotCombo.setCurrentIndex(3)
             self.bufferedM10msg = msg
             self.robot.parseEcho(msg)
         elif "M11" in msg:
@@ -419,18 +407,6 @@ class MainUI(QWidget):
         if tabindex==0:
             self.robot = ScaraRobot.Scara(self.scene, self.ui)
             self.ui.labelModel.setStyleSheet(ssTemplate.replace("model", "scara"))
-        elif tabindex==1:
-            self.robot = WallRobot.WallRobot(self.scene, self.ui)
-            self.ui.labelModel.setStyleSheet(ssTemplate.replace("model", "spider"))
-        elif tabindex==4:
-            self.robot = XYRobot.XYBot(self.scene,self.ui)
-            self.ui.labelModel.setStyleSheet(ssTemplate.replace("model", "xy"))
-        elif tabindex==2:
-            self.robot = EggBot.EggBot(self.scene,self.ui)
-            self.ui.labelModel.setStyleSheet(ssTemplate.replace("model", "egg"))
-        elif tabindex==3:
-            self.robot = CarRobot.CarBot(self.scene,self.ui)
-            self.ui.labelModel.setStyleSheet(ssTemplate.replace("model", "car"))
         # connect robot delegate
         self.robot.sendCmd = self.sendCmd
         self.robot.robotSig = self.robotSig
@@ -561,6 +537,8 @@ class MainUI(QWidget):
             self.picHeight = 220
             self.updatePic()
             self.rollAntiClockwise()
+            self.robot.colorList = None
+            self.robot.mode = SKETCH
             self.robotPrint()
 
 
@@ -583,6 +561,10 @@ class MainUI(QWidget):
             self.picHeight = 220
             self.updatePic()
             self.rollAntiClockwise()
+            self.robot.colorList = []
+            for color in self.pic.colorList :
+                self.robot.colorList.append(self.colorDict[color])
+            self.robot.mode = COLOR
             self.robotPrint()
 
 

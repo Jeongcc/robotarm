@@ -191,8 +191,12 @@ class TxtParser():
         self.pathLen = 0
         
         # avoid the deep copy
+        firstPath = [(0,0)]
+        finalPath = [(1575.0, 1050.0)]
+        self.pathList.append(firstPath)
         for p in self.originPathList :
             self.pathList.append(list(p))
+        self.pathList.append(finalPath)
 
         # user define transform
         print("Resize pathList", len(self.pathList))
@@ -240,8 +244,8 @@ class TxtParser():
                 x = (x - xmin) * scaler + drawRect[0]                    
                 y = (y - ymin) * scaler + drawRect[1]
                 self.pathList[i][j] = (x, y)
-
-        print("total len", self.pathLen)
+        self.pathList.pop(0) 
+        self.pathList.pop()
         return (dx * scaler, dy * scaler)
     
     # stretch for eggbot surface curve
@@ -259,20 +263,42 @@ class TxtParser():
                 self.pathList[i][j] = (x,y)
   
             
+    # def parse(self, filename):
+    #     f = open(filename, 'rt') 
+    #     lines = f.readlines()
+    #     f.close()
+
+    #     # characters = "[]"
+    #     # for x in range(len(characters)):
+    #     #     lines[0] = lines[0].replace("[","")
+    #     lines[0] = lines[0].replace("[", "")
+    #     lines[0] = lines[0].replace("]", "")
+    #     lines[0] = ''.join(lines[0].split())
+    #     self.colorList = lines[0].split(',')
+    #     self.originPathList = ast.literal_eval(lines[1])
+
     def parse(self, filename):
         f = open(filename, 'rt') 
         lines = f.readlines()
         f.close()
 
-        characters = "[]"
-        for x in range(len(characters)):
-            lines[0] = lines[0].replace(characters[x],"")
-        colorlist = lines[0].split(',')
-        txtlist = ast.literal_eval(lines[1])
+        # characters = "[]"
+        # for x in range(len(characters)):
+        #     lines[0] = lines[0].replace("[","")
+        lines[0] = lines[0].replace("[", "")
+        lines[0] = lines[0].replace("]", "")
+        lines[0] = ''.join(lines[0].split())
+        self.colorList = lines[0].split(',')
+        self.originPathList = ast.literal_eval(lines[1])
 
-        self.originPathList = txtlist
-        print("pathList 1", txtlist[0][0], txtlist[0][-1])
-        print("pathList 2", txtlist[1][0], txtlist[1][-1])
+        newOriginPathList = []
+        for line in self.originPathList :
+            newLists = []
+            for coor in line :
+                newCoor = ((coor[0] - 600) * 4, (coor[1] - 300) * 4)
+                newLists.append(newCoor)
+            newOriginPathList.append(newLists)
+        self.originPathList = newOriginPathList
 
 if __name__ == '__main__':
     buildArcSegment(10, 10, 0, 0, 10, 10, 0)

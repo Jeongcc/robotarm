@@ -98,6 +98,7 @@ class Scara(QGraphicsItem):
     def __init__(self, scene, ui, parent = None):
         super(Scara, self).__init__(parent)
         self.robotState = IDLE
+        self.mode = IDLE
         self.scene = scene
         self.ui = ui
         self.color = QColor(QtCore.Qt.lightGray)
@@ -120,6 +121,7 @@ class Scara(QGraphicsItem):
         self.robotCent = None
         self.sendCmd = None
         self.moveList = None
+        self.colorList = None
         self.pEllipse0 = None
         self.pEllipse1 = None
         self.moveList = None
@@ -220,16 +222,22 @@ class Scara(QGraphicsItem):
     the real movement of scara robot 
     """
     def moveOverList(self) :
+
         if self.moveList == None : return
+
         moveLen = len(self.moveList)
         moveCnt = 0
         self.M4(0) # turn laser power down when perform transition
         self.q.get()
-        self.colorList = [2, 3, 4, 5, 8, 7, 6, 2, 9, 15, 14, 13, 16, 12, 10, 11, 0, 1]
+
+        # self.moveList.pop(0) 
+        # self.moveList.pop()
 
         for move in self.moveList :
-
-            self.C1(self.colorList[moveCnt % 17])
+            
+            if self.mode == COLOR :
+                self.C1(self.colorList[moveCnt])
+            
             while self.robotState == BUSYING :
                 self.q.get()
             # loop for all points
@@ -281,14 +289,16 @@ class Scara(QGraphicsItem):
 
             moveCnt += 1
             self.robotSig.emit("pg %d" % (int(moveCnt * 100 / moveLen)))
-        self.G27()
+        
+        if self.mode == COLOR :
+            self.G27()
+            self.q.get()
         self.G28()
         self.printing = False
         self.robotSig.emit("done")
     
     def printPic(self):
         #update pen servo position
-        print("moveList len : " + str(len(self.moveList)))
         mStr = str(self.ui.penUpSpin.value())
         self.penUpPos = int(mStr)
         mStr = str(self.ui.penDownSpin.value())

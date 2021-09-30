@@ -4,18 +4,6 @@
 #include <Wire.h>
 
 
-/*
-  Version   1.0.1
-  HISTORY
-    Date      Author    Changes
-    ----      ------    -------
-    2015/June/8   - Robbo1    Fixed error with parameters being corrupted during the decoding of the cmd line  (Scara seemed to have a mind of its own)
-    2015/June/8   - Robbo1    Fixed potential buffer overflow problem if newline character was ever corrupted/lost
-    2015/June/8   - Robbo1    Fixed positional accuracy error.  Caused by using a test that allowed for finishing moving before all stepping complete
-    
-    
-*/
-// data stored in eeprom
 union {
     struct{
       char name[8];
@@ -26,7 +14,6 @@ union {
       int speed;
       int penUpPos;
       int penDownPos; 
-      int penColorPos; 
       int spongePos; 
     } data;
     char buf[64];
@@ -50,20 +37,19 @@ int servopin = servoPort.pin2();
 Servo servoPen;
 
 int colorPoint[18][2] = {
-  {-307, -159}, {-260, -157}, {-226,-155}, {-192, -155}, {-154, -153}, {-118, -151},
-  {-300, -188}, {-260, -187}, {-226, -187}, {-192, -184}, {-154, -187}, {-116, -184},
-  {-307, -224}, {-260, -224}, {-226, -223}, {-190, -218}, {-154, -220}, {-118, -218}
+  {-19, -344}, {-59, -344}, {-94, -344}, {-129, -344}, {-164, -344}, {-204, -344},
+  {-19, -309}, {-59, -309}, {-94, -309}, {-129, -309}, {-164, -309}, {-204, -309},
+  {-19, -274}, {-59, -274}, {-94, -274}, {-129, -274}, {-164, -274}, {-204, -274}
 };
 
-int waterPoint[2] = {-360, -200};
-int spongePoint[2] = {-355, -117};
+int waterPoint[2] = {-272, -315};
+int spongePoint[3][2] = {{-352, -276}, {-373, -256}, {-385, -239}};
 
 // Arm Length
 #define ARML1 248
 #define ARML2 206
 /************** motor movements ******************/
-void stepperMoveA(int dir)
-{
+void stepperMoveA(int dir) {
 //  Serial.printf("stepper A %d\n",dir);
   if (dir > 0) {
     stpA.dWrite1(LOW);
@@ -74,8 +60,8 @@ void stepperMoveA(int dir)
   stpA.dWrite2(LOW);
 }
 
-void stepperMoveB(int dir)
-{
+
+void stepperMoveB(int dir) {
 //  Serial.printf("stepper B %d\n",dir);
   if (dir > 0) {
     stpB.dWrite1(LOW);
@@ -92,8 +78,7 @@ void stepperMoveB(int dir)
 // th2 solution
 //2*atan(((- L1^2 + 2*L1*L2 - L2^2 + x^2 + y^2)*(L1^2 + 2*L1*L2 + L2^2 - x^2 - y^2))^(1/2)/(L1^2 + 2*L1*L2 + L2^2 - x^2 - y^2))
 float th1, th2;
-void scaraInverseKinect(float x, float y)
-{
+void scaraInverseKinect(float x, float y) {
   // convert x, y position to servo angle
   float L1 = roboSetup.data.arm0len;
   float L2 = roboSetup.data.arm1len;
@@ -107,8 +92,7 @@ void scaraInverseKinect(float x, float y)
 
 #define STEPS_PER_CIRCLE 16000.0f
 long pos1, pos2;
-void thetaToSteps(float th1, float th2)
-{
+void thetaToSteps(float th1, float th2) {
   pos1 = round(th1 / PI * STEPS_PER_CIRCLE / 2) ;
   pos2 = round(th2 / PI * STEPS_PER_CIRCLE / 2);
 }
@@ -137,8 +121,8 @@ int stepdelay_max = 2000;
 #define SEGMENT_DISTANCE 10 // 1 mm for each segment
 #define SPEED_STEP 1
 
-void doMove()
-{
+
+void doMove() {
   long mDelay = stepdelay_max;
   long temp_delay;
   int speedDiff = -SPEED_STEP;
@@ -201,8 +185,8 @@ void doMove()
   posB = tarB;
 }
 
-void prepareMove()
-{
+
+void prepareMove() {
   int maxD;
   unsigned long t0, t1;
   float segInterval;
@@ -224,8 +208,8 @@ void prepareMove()
   curY = tarY;
 }
 
-void initPosition()
-{
+
+void initPosition() {
   curX =-(roboSetup.data.arm0len + roboSetup.data.arm1len - 0.01); curY = 0;
   scaraInverseKinect(curX, curY);
   curTh1 = th1; curTh2 = th2;
@@ -234,40 +218,9 @@ void initPosition()
   posB = pos2;
 }
 
-/*
-  Robbo1 8/June/2015
-  
-  Fixed loop test where phantom parameters overwrite actual parameters and cause wild motions in scara
-  
-  Sympton  - The test was testing the previous loop's pointer and when last token/parameter is processed 
-             It would then loop one more time.  This meant that the loop used the NULL pointer as the 
-         string pointer.  Now if the bytes at address zero happened to start with the characters X or Y or Z or F or A
-         the loop would process that phantom string and convert the following bytes into a number and 
-         replace the actual parameters value with the phantom one.
-        
-         While this happened only in certain circumstances, it did happen for some svg files that 
-         happened to be placed in certain areas, because it seems the conversion codes would place 
-         intermediate data at addres 0 and if that data resulted in the byte at addres 0 being
-         one of the parameter labels (X Y Z F A) then the problem occurred.
-        
-         This explains why some people had wild things happen with the arms rotating all the way and 
-         crashing into the framework
-        
-  Solution - Move the strtok_r to the while loop test which means that the loop test is done on the
-             current pointer.  This means that when there are no more tokens (str == NULL) the loop
-         terminates without processing it.
-         
-  Other identified issues
-        If the code is changed prior to calling the function, the initial strtok_r may gobble 
-        up a parameter.  It is currently there because the "G" code is not removed from the 
-        cmd string prior to calling the function and has to be removed prior to processing the
-        parameters.
-        
-*/
 
 /************** calculate movements ******************/
-void parseCordinate(char * cmd)
-{
+void parseCordinate(char * cmd) {
   char * tmp;
   char * str;
   str = strtok_r(cmd, " ", &tmp);             // Robbo1 2015/6/8 comment - this removes the G code token from the input string - potential for future errors if method of processing G codes changes
@@ -290,8 +243,8 @@ void parseCordinate(char * cmd)
   prepareMove();
 }
 
-void parseServo(char * cmd)
-{
+
+void parseServo(char * cmd) {
   char * tmp;
   char * str;
   str = strtok_r(cmd, " ", &tmp);
@@ -299,16 +252,16 @@ void parseServo(char * cmd)
   servoPen.write(pos);
 }
 
-void parseAuxDelay(char * cmd)
-{
+
+void parseAuxDelay(char * cmd) {
   char * tmp;
   char * str;
   str = strtok_r(cmd, " ", &tmp);
   stepAuxDelay = atol(tmp);
 }
 
-void parseLaserPower(char * cmd)
-{
+
+void parseLaserPower(char * cmd) {
   char * tmp;
   char * str;
   str = strtok_r(cmd, " ", &tmp);
@@ -316,8 +269,8 @@ void parseLaserPower(char * cmd)
   laser.run(pwm);
 }
 
-void parseGcode(char * cmd)
-{
+
+void parseGcode(char * cmd) {
   int code;
   code = atoi(cmd);
   switch (code) {
@@ -328,91 +281,99 @@ void parseGcode(char * cmd)
       brushClean();
       break;
     case 28 : // home
-      stepAuxDelay = 0;
-      tarX =-(roboSetup.data.arm0len + roboSetup.data.arm1len - 0.01); tarY = 0;
-      servoPen.write(roboSetup.data.penUpPos);
-      // laser.run(0);
-      prepareMove();
+      goHome();
       break; 
   }
 }
 
+
 void brushClean() {
-  for (int i = 0; i < 3; i++) {
+  for (int i = 0; i < 2; i++) {
     Serial.println("Cleaning Brush start");
-    tarX = waterPoint[0];
-    tarY = waterPoint[1];
+    tarX = waterPoint[0]; tarY = waterPoint[1];
     prepareMove();
     servoPen.write(roboSetup.data.penDownPos);
     delay(100);
-    for (int i = 0; i < 5; i++){
+    for (int j = 0; j < 20; j++){
       servoPen.write(roboSetup.data.penUpPos);
       delay(100);
       servoPen.write(roboSetup.data.penDownPos);
       delay(100);
     }
     Serial.println("Cleaning Brush complete");
-    servoPen.write(roboSetup.data.penUpPos + 10);
+    servoPen.write(roboSetup.data.penUpPos);
 
-    if (i == 2) continue;
+    if (i == 1) continue;
     Serial.println("Removing water start");
-    if (random(2) == 1) {
-      tarX = spongePoint[0] + random(20);
-      tarY = spongePoint[1] + random(20);
-    } else {
-      tarX = spongePoint[0] - random(20);
-      tarY = spongePoint[1] - random(20);
-    }
 
+    tarX = spongePoint[i][0]; tarY = spongePoint[i][1];
     prepareMove();
-    servoPen.write(roboSetup.data.penColorPos);
-    delay(100);
-    for (int i = 0; i < 3; i++){
-      servoPen.write(roboSetup.data.spongePos);
+    for (int i = 0; i < 7; i++){
+      servoPen.write(roboSetup.data.penUpPos);
       delay(100);
-      servoPen.write(roboSetup.data.penDownPos + 10);
+      servoPen.write(roboSetup.data.penDownPos);
       delay(100);
     }
     Serial.println("Removing water complete");
-    servoPen.write(roboSetup.data.penUpPos + 10);
+    servoPen.write(roboSetup.data.penUpPos);
   }
 }
 
-void parseCcode(char * cmd)
-{
+
+void goHome() {
+  Serial.println("Move to start point start");
+  tarX =-(roboSetup.data.arm0len + roboSetup.data.arm1len - 0.01); 
+  tarY = 0;
+  prepareMove();
+  Serial.println("Move to start point complete");
+  servoPen.write(roboSetup.data.penUpPos + 10);
+}
+
+
+void brushColor(int colorPos) {
+  delay(100);
+  servoPen.write(180);
+  delay(100);
+  Serial.print("Coloring Brush start : "); Serial.println((int)colorPos);
+  tarX = colorPoint[colorPos][0];
+  tarY = colorPoint[colorPos][1];
+  prepareMove();
+
+  servoPen.write(roboSetup.data.penDownPos);
+  tarX -= 10;
+  prepareMove();
+  tarY -= 10;
+  prepareMove();
+  for (int i = 0; i < 7; i++) {
+    tarX += 20;
+    prepareMove();
+    tarY += 20;
+    prepareMove();
+    tarX -= 20;
+    prepareMove();
+    tarY -= 20;
+    prepareMove();
+  }
+  Serial.print("Coloring Brush complete : "); Serial.println((int)colorPos);
+  delay(100);
+  servoPen.write(180);
+  delay(100);
+}
+
+
+void parseCcode(char * cmd) {
   char * tmp;
   char * str;
   str = strtok_r(cmd, " ", &tmp);
-  int colorpos = atoi(tmp);
+  int colorPos = atoi(tmp);
 
-  // Serial.println("Move to start point start");
-  // tarX =-(roboSetup.data.arm0len + roboSetup.data.arm1len - 0.01); 
-  // tarY = 0;
-  // prepareMove();
-  // Serial.println("Move to start point complete");
-  // servoPen.write(roboSetup.data.penUpPos + 10);
-  
-  // brushClean();
-
-  // Serial.print("Coloring Brush start : "); Serial.println((int)colorpos);
-  // tarX = colorPoint[colorpos][0];
-  // tarY = colorPoint[colorpos][1];
-  // prepareMove();
-  // Serial.print("Pen Color Pos : ");
-  // Serial.println((int)roboSetup.data.penColorPos);
-  // servoPen.write(roboSetup.data.penColorPos);
-  // for (int i = 0; i < 8; i++){
-  //   tarX = colorPoint[colorpos][0] + 5;
-  //   prepareMove();
-  //   tarX = colorPoint[colorpos][0] - 5;
-  //   prepareMove();
-  // }
-  // Serial.print("Coloring Brush complete : "); Serial.println((int)colorpos);
-  servoPen.write(roboSetup.data.penUpPos);
+  goHome();
+  brushClean();
+  brushColor(colorPos);
 }
 
-void echoArmSetup(char * cmd)
-{
+
+void echoArmSetup(char * cmd) {
   Serial.print("M10 MSCARA ");
   Serial.print(roboSetup.data.arm0len); Serial.print(' ');
   Serial.print(roboSetup.data.arm1len); Serial.print(' ');
@@ -426,8 +387,7 @@ void echoArmSetup(char * cmd)
 }
 
 
-void parseRobotSetup(char * cmd)
-{
+void parseRobotSetup(char * cmd) {
   char * tmp;
   char * str;
   str = strtok_r(cmd, " ", &tmp);
@@ -454,8 +414,7 @@ void parseRobotSetup(char * cmd)
 }
 
 
-void parsePenPosSetup(char * cmd)
-{
+void parsePenPosSetup(char * cmd) {
   char * tmp;
   char * str;
   str = strtok_r(cmd, " ", &tmp);
@@ -471,15 +430,12 @@ void parsePenPosSetup(char * cmd)
   Serial.print(roboSetup.data.penUpPos);
   Serial.print(" D:");
   Serial.print(roboSetup.data.penDownPos);
-  Serial.print(" C:");
-  Serial.println(roboSetup.data.penColorPos);
 
   syncRobotSetup();
 }
 
 
-void parseMcode(char * cmd)
-{
+void parseMcode(char * cmd) {
   int code;
   code = atoi(cmd);
   switch(code){
@@ -505,8 +461,7 @@ void parseMcode(char * cmd)
 }
 
 
-void parseCmd(char * cmd)
-{
+void parseCmd(char * cmd) {
   if (cmd[0] == 'G') { // gcode
     parseGcode(cmd + 1);  
   } else if (cmd[0] == 'M') { // mcode
@@ -521,31 +476,26 @@ void parseCmd(char * cmd)
 
 
 // local data
-void initRobotSetup()
-{
-  int i;
+void initRobotSetup() {
   //Serial.println("read eeprom");
-  for (i = 0; i < 64; i++) {
+  for (int i = 0; i < 64; i++) {
     roboSetup.buf[i] = EEPROM.read(i);
-    //Serial.print(roboSetup.buf[i],16);Serial.print(' ');
   }
-  //Serial.println();
-  // if (strncmp(roboSetup.data.name, "SCARA4", 6) != 0) {
-    Serial.println("set to default setup");
-    // set to default setup
-    memset(roboSetup.buf, 0, 64);
-    memcpy(roboSetup.data.name, "SCARA4", 6);
-    roboSetup.data.motoADir = 0;
-    roboSetup.data.motoBDir = 0;
-    roboSetup.data.arm0len = ARML1;
-    roboSetup.data.arm1len = ARML2;
-    roboSetup.data.speed = 80;
-    roboSetup.data.penUpPos = 160;
-    roboSetup.data.penDownPos = 120;
-    roboSetup.data.penColorPos = 90;
-    roboSetup.data.spongePos = 140;
-    syncRobotSetup();
-  // }
+
+  Serial.println("set to default setup");
+  // set to default setup
+  memset(roboSetup.buf, 0, 64);
+  memcpy(roboSetup.data.name, "SCARA4", 6);
+  roboSetup.data.motoADir = 0;
+  roboSetup.data.motoBDir = 0;
+  roboSetup.data.arm0len = ARML1;
+  roboSetup.data.arm1len = ARML2;
+  roboSetup.data.speed = 80;
+  roboSetup.data.penUpPos = 180;
+  roboSetup.data.penDownPos = 120;
+  roboSetup.data.spongePos = 120;
+  syncRobotSetup();
+
   // init motor direction
   if (roboSetup.data.motoADir == 0) {
     motorAfw = 1; motorAbk = -1;
@@ -564,8 +514,7 @@ void initRobotSetup()
 }
 
 
-void syncRobotSetup()
-{
+void syncRobotSetup() {
   int i;
   for (i = 0; i < 64; i++) {
     EEPROM.write(i, roboSetup.buf[i]);
@@ -593,8 +542,7 @@ char buf2[64];
 char bufindex2;
 
 
-boolean process_serial(void)
-{
+boolean process_serial(void) {
   boolean result = false;
   memset(buf, 0, 64);
   bufindex = 0;
@@ -625,14 +573,14 @@ boolean process_serial(void)
 void loop() {
   if(Serial.available()) {
     char c = Serial.read();
-    //buf[bufindex++]=c;                 // Robbo1 2015/6/8 Removed - Do not store the \n
+    //buf[bufindex++]=c;                   // Robbo1 2015/6/8 Removed - Do not store the \n
     if(c == '\n') {
       buf[bufindex++] = '\0';              // Robbo1 2015/6/8 Add     - Null terminate the string - Essential for first use of 'buf' and good programming practice
       parseCmd(buf);
       memset(buf, 0, 64);
       bufindex = 0;
-    } else if(bufindex < 64){               // Robbo1 2015/6/8 Add     - Only add char to string if the string can fit it and still be null terminated 
+    } else if(bufindex < 64) {             // Robbo1 2015/6/8 Add     - Only add char to string if the string can fit it and still be null terminated 
       buf[bufindex++] = c;                 // Robbo1 2015/6/8 Moved   - Store the character here now
-  }
+    }
   }
 }

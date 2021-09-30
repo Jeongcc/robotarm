@@ -250,6 +250,9 @@ class SvgParser():
                 x = (x - xmin) * scaler + drawRect[0]                    
                 y = (y - ymin) * scaler + drawRect[1]
                 self.pathList[i][j] = (x, y)
+
+        self.pathList.pop(0) 
+        self.pathList.pop()
         return (dx * scaler, dy * scaler)
     
     # stretch for eggbot surface curve
@@ -462,7 +465,7 @@ class SvgParser():
                             pbuff.append(pbuff[0]) # if prev state not bez-curve, use current point as first control point
                             pbuff.append((x+dx,y+dy))
                             
-                    if curvecn == 2:
+                    if curvecnt == 2:
                         # set target point
                         pbuff.append((x+dx,y+dy))
                         bzseg = buildBezierSegment(pbuff[0],pbuff[1],pbuff[2],pbuff[3])

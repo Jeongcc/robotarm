@@ -148,7 +148,7 @@ py2exe_options = dict(
     compressed=True, # uncompressed may or may not have a faster startup
     bundle_files=2,
     dist_dir='dist',
-    includes=["sip"],
+    # includes=["sip"],
     )
 
 
