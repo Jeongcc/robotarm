@@ -37,13 +37,16 @@ int servopin = servoPort.pin2();
 Servo servoPen;
 
 int colorPoint[18][2] = {
-  {-19, -344}, {-59, -344}, {-94, -344}, {-129, -344}, {-164, -344}, {-204, -344},
-  {-19, -309}, {-59, -309}, {-94, -309}, {-129, -309}, {-164, -309}, {-204, -309},
-  {-19, -274}, {-59, -274}, {-94, -274}, {-129, -274}, {-164, -274}, {-204, -274}
+  {-15, -332}, {-55, -332}, {-90, -332}, {-125, -332}, {-160, -332}, {-200, -332},
+  {-15, -297}, {-55, -297}, {-90, -297}, {-125, -297}, {-160, -297}, {-200, -297},
+  {-15, -262}, {-55, -262}, {-90, -262}, {-125, -262}, {-160, -262}, {-200, -262}
 };
 
 int waterPoint[2] = {-272, -315};
 int spongePoint[3][2] = {{-352, -276}, {-373, -256}, {-385, -239}};
+
+int prevColorPos = -1;
+bool spotDraw = false;
 
 // Arm Length
 #define ARML1 248
@@ -240,7 +243,13 @@ void parseCordinate(char * cmd) {
       stepAuxDelay = atol(str + 1);
     }
   }
-  prepareMove();
+
+  if (!spotDraw) prepareMove();
+  else {
+    servoPen.write(roboSetup.data.penUpPos);
+    prepareMove();
+    servoPen.write(roboSetup.data.penDownPos);
+  }
 }
 
 
@@ -278,44 +287,34 @@ void parseGcode(char * cmd) {
       parseCordinate(cmd);
       break;
     case 27 :
-      brushClean();
+      brushClean(false, false);
       break;
     case 28 : // home
       goHome();
       break; 
-  }
-}
+    case 29 : // Check color pos
+      tarX = colorPoint[17][0];
+      tarY = colorPoint[17][1];
+      prepareMove();
 
+      servoPen.write(roboSetup.data.penDownPos);
+      delay(1000);
 
-void brushClean() {
-  for (int i = 0; i < 2; i++) {
-    Serial.println("Cleaning Brush start");
-    tarX = waterPoint[0]; tarY = waterPoint[1];
-    prepareMove();
-    servoPen.write(roboSetup.data.penDownPos);
-    delay(100);
-    for (int j = 0; j < 20; j++){
       servoPen.write(roboSetup.data.penUpPos);
       delay(100);
+
+      tarX = colorPoint[0][0];
+      tarY = colorPoint[0][1];
+      prepareMove();
+
       servoPen.write(roboSetup.data.penDownPos);
-      delay(100);
-    }
-    Serial.println("Cleaning Brush complete");
-    servoPen.write(roboSetup.data.penUpPos);
+      delay(1000);
 
-    if (i == 1) continue;
-    Serial.println("Removing water start");
-
-    tarX = spongePoint[i][0]; tarY = spongePoint[i][1];
-    prepareMove();
-    for (int i = 0; i < 7; i++){
       servoPen.write(roboSetup.data.penUpPos);
       delay(100);
-      servoPen.write(roboSetup.data.penDownPos);
-      delay(100);
-    }
-    Serial.println("Removing water complete");
-    servoPen.write(roboSetup.data.penUpPos);
+      break; 
+    case 30 :
+      spotDraw = true;
   }
 }
 
@@ -330,6 +329,61 @@ void goHome() {
 }
 
 
+void brushClean(bool powerUp, bool noSponge) {
+
+  int waterCnt = 20;
+  if (powerUp) {
+    waterCnt = 40;
+  }
+
+  Serial.println("Watering Brush start");
+  tarX = waterPoint[0]; tarY = waterPoint[1];
+  prepareMove();
+  servoPen.write(roboSetup.data.penDownPos);
+  delay(100);
+  for (int j = 0; j < waterCnt; j++){
+    servoPen.write(roboSetup.data.penUpPos);
+    delay(100);
+    servoPen.write(roboSetup.data.penDownPos);
+    delay(100);
+  }
+  Serial.println("Watering Brush complete");
+  servoPen.write(roboSetup.data.penUpPos);
+
+  if (noSponge) {
+    Serial.println("No Sponge Time");
+    return;
+  }
+
+  Serial.println("Removing water start");
+
+  tarX = spongePoint[random(3)][0]; tarY = spongePoint[random(3)][1];
+  prepareMove();
+  for (int i = 0; i < 7; i++){
+    servoPen.write(roboSetup.data.penUpPos);
+    delay(100);
+    servoPen.write(roboSetup.data.penDownPos);                                                                            
+    delay(100);
+  }
+  Serial.println("Removing water complete");
+  servoPen.write(roboSetup.data.penUpPos);
+
+  Serial.println("Watering Brush start : Second");
+  tarX = waterPoint[0]; tarY = waterPoint[1];
+  prepareMove();
+  servoPen.write(roboSetup.data.penDownPos);
+  delay(100);
+  for (int j = 0; j < waterCnt; j++){
+    servoPen.write(roboSetup.data.penUpPos);
+    delay(100);
+    servoPen.write(roboSetup.data.penDownPos);
+    delay(100);
+  }
+  Serial.println("Watering Brush complete : Second");
+  servoPen.write(roboSetup.data.penUpPos);
+}
+
+
 void brushColor(int colorPos) {
   delay(100);
   servoPen.write(180);
@@ -340,18 +394,18 @@ void brushColor(int colorPos) {
   prepareMove();
 
   servoPen.write(roboSetup.data.penDownPos);
-  tarX -= 10;
+  tarX -= 5;
   prepareMove();
-  tarY -= 10;
+  tarY -= 5;
   prepareMove();
   for (int i = 0; i < 7; i++) {
-    tarX += 20;
+    tarX += 10;
     prepareMove();
-    tarY += 20;
+    tarY += 10;
     prepareMove();
-    tarX -= 20;
+    tarX -= 10;
     prepareMove();
-    tarY -= 20;
+    tarY -= 10;
     prepareMove();
   }
   Serial.print("Coloring Brush complete : "); Serial.println((int)colorPos);
@@ -366,10 +420,16 @@ void parseCcode(char * cmd) {
   char * str;
   str = strtok_r(cmd, " ", &tmp);
   int colorPos = atoi(tmp);
+  bool powerUp = false;
+  bool noSponge = false;
 
-  goHome();
-  brushClean();
+  if (prevColorPos == 0 || prevColorPos == 1 || prevColorPos == 2|| prevColorPos == 10) powerUp = true;
+  if (prevColorPos == colorPos) noSponge = true;
+  
+  brushClean(powerUp, noSponge); 
   brushColor(colorPos);
+
+  prevColorPos = colorPos;
 }
 
 

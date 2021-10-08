@@ -262,43 +262,48 @@ class TxtParser():
                 x = x+x0
                 self.pathList[i][j] = (x,y)
   
-            
-    # def parse(self, filename):
-    #     f = open(filename, 'rt') 
-    #     lines = f.readlines()
-    #     f.close()
+    
+    def list_chunk(self, lst, n):
+        return [lst[i : i + n] for i in range(0, len(lst), n)]
 
-    #     # characters = "[]"
-    #     # for x in range(len(characters)):
-    #     #     lines[0] = lines[0].replace("[","")
-    #     lines[0] = lines[0].replace("[", "")
-    #     lines[0] = lines[0].replace("]", "")
-    #     lines[0] = ''.join(lines[0].split())
-    #     self.colorList = lines[0].split(',')
-    #     self.originPathList = ast.literal_eval(lines[1])
 
     def parse(self, filename):
+        colorDict = {"#000000" : 0, "#0D072E" : 1, "#190F3A" : 2,  "#012362" : 3, "#354C96" : 4, "#1E468E": 5,
+                "#004547" : 6, "#03753A" : 7, "#4F93B8" : 8, "#95244D" : 9, "#690E20" : 10, "#461920" : 11, 
+                "#961D12" : 12, "#946314" : 13, "#B03402" : 14, "#C3732C" : 15, "#BEBC46" : 16, "#F2F2F2" : 17}
+
         f = open(filename, 'rt') 
         lines = f.readlines()
         f.close()
 
-        # characters = "[]"
-        # for x in range(len(characters)):
-        #     lines[0] = lines[0].replace("[","")
         lines[0] = lines[0].replace("[", "")
         lines[0] = lines[0].replace("]", "")
         lines[0] = ''.join(lines[0].split())
-        self.colorList = lines[0].split(',')
-        self.originPathList = ast.literal_eval(lines[1])
+        colorList = lines[0].split(',')
+        originPathList = ast.literal_eval(lines[1])
 
-        newOriginPathList = []
-        for line in self.originPathList :
-            newLists = []
-            for coor in line :
-                newCoor = ((coor[0] - 600) * 4, (coor[1] - 300) * 4)
-                newLists.append(newCoor)
-            newOriginPathList.append(newLists)
-        self.originPathList = newOriginPathList
+        forSort = []
+        for i in range(len(colorList)) :
+            forSort.append((colorDict[colorList[i]], originPathList[i]))
+        forSort.sort(key = lambda x : x[0], reverse = True)
+
+        self.colorList = []
+        self.originPathList = []
+
+        for i in range(len(forSort)) :
+            self.colorList.append(forSort[i][0])
+            self.originPathList.append(forSort[i][1])
+
+
+        # for i in range(len(forSort)) :        
+        #     chunk = int(len(forSort[i][1]) / 200 + 1)
+        #     quantity = int(len(forSort[i][1]) / chunk)
+        #     list_chunked = self.list_chunk(forSort[i][1], quantity)
+
+        #     for j in range(chunk) : 
+        #         self.colorList.append(forSort[i][0])
+        #         self.originPathList.append(list_chunked[j])
+
 
 if __name__ == '__main__':
     buildArcSegment(10, 10, 0, 0, 10, 10, 0)

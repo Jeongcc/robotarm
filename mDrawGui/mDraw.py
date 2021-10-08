@@ -42,9 +42,6 @@ class MainUI(QWidget):
         self.picHeight = 0
         self.svgWidth = 0
         self.svgHeight = 0
-        self.colorDict = {"#000000" : 0, "#0D072E" : 1, "#190F3A" : 2, "#012362" : 3, "#354C96" : 4, "#1E468E": 5,
-                        "#004547" : 6, "#03753A" : 7, "#4F93B8" : 8, "#95244D" : 9, "#690E20" : 10, "#461920" : 11, 
-                        "#961D12" : 12, "#946314" : 13, "#B03402" : 14, "#C3732C" : 15, "#BEBC46" : 16, "#F2F2F2" : 17}
         self.initUI()
         
     def initUI(self):
@@ -561,9 +558,7 @@ class MainUI(QWidget):
             self.picHeight = 220
             self.updatePic()
             self.rollAntiClockwise()
-            self.robot.colorList = []
-            for color in self.pic.colorList :
-                self.robot.colorList.append(self.colorDict[color])
+            self.robot.colorList = self.pic.colorList
             self.robot.mode = COLOR
             self.robotPrint()
 

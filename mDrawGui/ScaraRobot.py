@@ -230,15 +230,15 @@ class Scara(QGraphicsItem):
         self.M4(0) # turn laser power down when perform transition
         self.q.get()
 
-        # self.moveList.pop(0) 
-        # self.moveList.pop()
+        if self.mode == COLOR :
+            self.G27()
+            self.q.get()
 
         for move in self.moveList :
             
             if self.mode == COLOR :
                 self.C1(self.colorList[moveCnt])
-            
-            while self.robotState == BUSYING :
+                print("Current Color", self.colorList[moveCnt])
                 self.q.get()
             # loop for all points
             lineNode = len(move)
@@ -401,11 +401,13 @@ class Scara(QGraphicsItem):
     def G27(self) :
         if self.robotState != IDLE : return
         cmd = "G27\n"
+        self.robotGoBusy()
         self.sendCmd(cmd)
 
     def G28(self) :
         if self.robotState != IDLE : return
         cmd = "G28\n"
+        self.robotGoBusy()
         self.sendCmd(cmd)
         self.pos = (-(self.L1 + self.L2-0.01), 0.0)
         self.th = self.scaraInverseKinect(self.pos)
